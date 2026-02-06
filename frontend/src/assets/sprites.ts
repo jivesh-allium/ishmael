@@ -58,6 +58,19 @@ export const WHALE_MINI_SPRITE = svgToDataUri(`
   <circle cx="4.5" cy="5.5" r="0.4" fill="white"/>
 </svg>`);
 
+export const WHITE_WHALE_SPRITE = svgToDataUri(`
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="48" viewBox="0 0 80 48">
+  <ellipse cx="34" cy="26" rx="26" ry="14" fill="#e8e0d0" opacity="0.95"/>
+  <ellipse cx="34" cy="26" rx="22" ry="11" fill="#f5f0e6"/>
+  <path d="M58 21 Q68 10 76 16 Q72 18 66 24 Z" fill="#e8e0d0"/>
+  <path d="M58 31 Q68 38 76 30 Q72 28 66 26 Z" fill="#e8e0d0"/>
+  <circle cx="16" cy="22" r="3" fill="#1e293b"/>
+  <circle cx="16" cy="22" r="1.2" fill="#dc2626"/>
+  <path d="M8 20 Q3 14 5 8" stroke="#f5f0e6" stroke-width="2.5" fill="none" opacity="0.7"/>
+  <path d="M8 18 Q1 12 3 6" stroke="#f5f0e6" stroke-width="2" fill="none" opacity="0.5"/>
+  <ellipse cx="30" cy="34" rx="14" ry="4" fill="#d4c5a0" opacity="0.2"/>
+</svg>`);
+
 export const ISLAND_SPRITE = svgToDataUri(`
 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
   <ellipse cx="24" cy="38" rx="18" ry="6" fill="#1a6b3a" opacity="0.4"/>

@@ -3,6 +3,7 @@ import type { MapEntity, WhaleAlert } from "../types/whale";
 import { ALERT_EMOJI } from "../types/whale";
 import { formatUsd, formatAmount, shortenAddress } from "../lib/api";
 import { getExplorerTxUrl, getExplorerName } from "../lib/explorer";
+import { quoteForHash } from "../lib/quotes";
 
 interface WhaleInspectorProps {
   whale: WhaleAlert;
@@ -34,7 +35,11 @@ export function WhaleInspector({ whale, onClose }: WhaleInspectorProps) {
               className="text-lg text-amber-100 font-bold"
               style={{ fontFamily: "'Pirata One', cursive" }}
             >
-              Whale Sighting
+              {whale.usd_value > 500_000_000
+                ? "THE WHITE WHALE!"
+                : whale.usd_value > 50_000_000
+                  ? "THAR SHE BLOWS!"
+                  : "Whale Sighting"}
             </h3>
             <span className="text-xs text-slate-400 capitalize">
               {whale.alert_type.replace("_", " ")} on {whale.chain}
@@ -137,6 +142,14 @@ export function WhaleInspector({ whale, onClose }: WhaleInspectorProps) {
               </span>
             );
           })()}
+        </div>
+
+        {/* Captain's Log quote */}
+        <div className="pt-2 mt-2 border-t border-[#1a3a5c]/50">
+          <p className="text-[11px] text-slate-500 italic">
+            <span className="text-slate-600">From the Captain's Log:</span>{" "}
+            "{quoteForHash(whale.tx_hash)}"
+          </p>
         </div>
       </div>
     </motion.div>

@@ -4,6 +4,7 @@ import { ALERT_EMOJI } from "../types/whale";
 import { formatUsd, formatAmount, shortenAddress } from "../lib/api";
 import { geoToPixel } from "../lib/geo";
 import { getExplorerTxUrl } from "../lib/explorer";
+import { quoteOfTheHour } from "../lib/quotes";
 
 interface Props {
   alerts: WhaleAlert[];
@@ -132,7 +133,9 @@ export function AlertFeed({ alerts, onClickAlert, connected }: Props) {
           <div className="p-8 text-center text-slate-500 text-sm">
             <p className="text-3xl mb-3">🌊</p>
             <p>Calm seas...</p>
-            <p className="text-xs mt-1">Waiting for whale sightings</p>
+            <p className="text-xs mt-2 italic text-slate-600 px-2">
+              "{quoteOfTheHour()}"
+            </p>
           </div>
         ) : (
           <AnimatePresence initial={false}>

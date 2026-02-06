@@ -15,7 +15,7 @@ export function Compass({ entities, whales }: Props) {
   const scaleY = (size - padding * 2) / MAP_HEIGHT;
 
   return (
-    <div className="absolute left-4 bottom-4 z-20">
+    <div className="absolute left-4 bottom-4 z-20" title="Here be whales">
       <svg
         width={size}
         height={size}

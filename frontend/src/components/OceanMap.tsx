@@ -6,12 +6,15 @@ import type { MapEntity, WhaleAlert } from "../types/whale";
 import { IslandMarker } from "./IslandMarker";
 import { ShipCursor } from "./ShipCursor";
 import { TransferLine } from "./TransferLine";
+import { MobyDick } from "./MobyDick";
 
 interface Props {
   entities: MapEntity[];
   whales: WhaleAlert[];
   onSelectWhale: (whale: WhaleAlert) => void;
   onSelectIsland: (entity: MapEntity) => void;
+  onMobyClick: () => void;
+  mobyHidden: boolean;
   panTarget: { x: number; y: number } | null;
 }
 
@@ -20,6 +23,8 @@ export function OceanMap({
   whales,
   onSelectWhale,
   onSelectIsland,
+  onMobyClick,
+  mobyHidden,
   panTarget,
 }: Props) {
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -232,6 +237,13 @@ export function OceanMap({
           <ShipCursor
             world={worldRef.current}
             mouseWorld={mouseWorld}
+          />
+
+          {/* Moby Dick easter egg */}
+          <MobyDick
+            world={worldRef.current!}
+            hidden={mobyHidden}
+            onClick={onMobyClick}
           />
         </>
       )}
