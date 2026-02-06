@@ -1,0 +1,29 @@
+{
+  "chain": "bitcoin",
+  "addresses": {
+    "exchanges": {
+      "Binance Cold 1": "34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo",
+      "Binance Cold 2": "3LYJfcfHPXYJreMsASk2jkn69LWEYKzexb",
+      "Binance Cold 3": "bc1qm34lsc65zpw79lxes69zkqmk6ee3ewf0j77s3h",
+      "Coinbase Cold": "3Cbq7aT1tY8kMxWLbitaG7yT6bPbKChq64",
+      "Coinbase Prime": "bc1q7cyrfmck2ffu2ud3rn5l5a8yv6f0chkp0zpemf",
+      "Kraken Cold": "3H5JTt42K7RmZtromfTSefcMEFMMe18pMD",
+      "Bitfinex Cold": "3D2oetdNuZUqQHPJmcMDDHYoqkyNVsFk9r",
+      "Bitfinex Cold 2": "bc1qgdjqv0av3q56jvd82tkdjpy7gdp9ut8tlqmgrpmv24sq90ecnvqqjwvw97",
+      "OKX Cold": "1FzWLkAahHooV3kzTgyx6qsXoRDrBsrXf3",
+      "Gemini Cold": "3CKHBoTnCsqUJhYSMZ9b3E3JpEQnwfNi4b",
+      "Huobi Cold": "1HckjUpRGcrrRAtFaaCAUaGjsPx9oYmLaZ",
+      "Bybit Cold": "bc1q8rl0zw3y4tspxmlsyrfnmkhmhnxptmhq7q3ydv"
+    },
+    "whales": {
+      "MicroStrategy": "1P5ZEDWTKTFGxQjZphgWPQUpe554WKDfHQ",
+      "Block.one": "3MhMFsDVxCGRatGgQNCJFAKBfnAJqpMvTx",
+      "Tether Treasury (BTC)": "1NTMakcgVwQpMdGxRQnFKCaxT5VPFrkfZj",
+      "Satoshi (dormant)": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+      "US Gov Seized (Silk Road)": "bc1qa5wkgaew2dkv56kc6hp23ly7risml08vxvlqwl",
+      "Mt. Gox Trustee": "1JbezDVd9VsK9o1Ga9UqLydeuEvhKLAPs6",
+      "Grayscale GBTC": "3Nxwenay9Z8Lc9JBiCvttGW659JHo5pMbA",
+      "Marathon Digital": "bc1qhwfqp23dzan27tf4nnsks5905yhnl36mde0rlv"
+    }
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "Binance Hot 1": {"lat": 25.2048, "lon": 55.2708, "country": "AE"},
+  "Binance Hot 2": {"lat": 25.2048, "lon": 55.2708, "country": "AE"},
+  "Binance Hot 3": {"lat": 25.2048, "lon": 55.2708, "country": "AE"},
+  "Binance Cold": {"lat": 25.2048, "lon": 55.2708, "country": "AE"},
+  "Binance Cold 1": {"lat": 25.2048, "lon": 55.2708, "country": "AE"},
+  "Binance Cold 2": {"lat": 25.2048, "lon": 55.2708, "country": "AE"},
+  "Binance Cold 3": {"lat": 25.2048, "lon": 55.2708, "country": "AE"},
+  "Binance Hot (SOL)": {"lat": 25.2048, "lon": 55.2708, "country": "AE"},
+
+  "Coinbase Hot": {"lat": 37.7749, "lon": -122.4194, "country": "US"},
+  "Coinbase Prime": {"lat": 37.7749, "lon": -122.4194, "country": "US"},
+  "Coinbase Commerce": {"lat": 37.7749, "lon": -122.4194, "country": "US"},
+  "Coinbase Cold": {"lat": 37.7749, "lon": -122.4194, "country": "US"},
+  "Coinbase Hot (SOL)": {"lat": 37.7749, "lon": -122.4194, "country": "US"},
+
+  "Kraken Hot": {"lat": 37.7749, "lon": -122.4194, "country": "US"},
+  "Kraken Cold": {"lat": 37.7749, "lon": -122.4194, "country": "US"},
+  "Kraken Hot (SOL)": {"lat": 37.7749, "lon": -122.4194, "country": "US"},
+
+  "OKX Hot 1": {"lat": -4.6796, "lon": 55.4920, "country": "SC"},
+  "OKX Hot 2": {"lat": -4.6796, "lon": 55.4920, "country": "SC"},
+  "OKX Cold": {"lat": -4.6796, "lon": 55.4920, "country": "SC"},
+  "OKX Hot (SOL)": {"lat": -4.6796, "lon": 55.4920, "country": "SC"},
+
+  "Bitfinex Hot": {"lat": 22.3193, "lon": 114.1694, "country": "HK"},
+  "Bitfinex Cold": {"lat": 22.3193, "lon": 114.1694, "country": "HK"},
+  "Bitfinex Cold 2": {"lat": 22.3193, "lon": 114.1694, "country": "HK"},
+
+  "Bybit Hot": {"lat": 25.2048, "lon": 55.2708, "country": "AE"},
+  "Bybit Cold": {"lat": 25.2048, "lon": 55.2708, "country": "AE"},
+  "Bybit Hot (SOL)": {"lat": 25.2048, "lon": 55.2708, "country": "AE"},
+
+  "Gate.io Hot": {"lat": 19.2869, "lon": -81.3674, "country": "KY"},
+
+  "Gemini Hot": {"lat": 40.7128, "lon": -74.0060, "country": "US"},
+  "Gemini Cold": {"lat": 40.7128, "lon": -74.0060, "country": "US"},
+
+  "Huobi Hot": {"lat": -4.6796, "lon": 55.4920, "country": "SC"},
+  "Huobi Cold": {"lat": -4.6796, "lon": 55.4920, "country": "SC"},
+
+  "KuCoin Hot": {"lat": -4.6796, "lon": 55.4920, "country": "SC"},
+
+  "Crypto.com Hot": {"lat": 1.3521, "lon": 103.8198, "country": "SG"},
+
+  "FTX Estate": {"lat": 25.0343, "lon": -77.3963, "country": "BS"},
+
+  "Uniswap Treasury": {"lat": 40.7128, "lon": -74.0060, "country": "US"},
+  "Aave Treasury": {"lat": 51.5074, "lon": -0.1278, "country": "GB"},
+  "Lido Treasury": {"lat": 47.3769, "lon": 8.5417, "country": "CH"},
+  "MakerDAO Pause Proxy": {"lat": 47.3769, "lon": 8.5417, "country": "CH"},
+  "Compound Treasury": {"lat": 37.7749, "lon": -122.4194, "country": "US"},
+
+  "Tether Treasury": {"lat": 18.4207, "lon": -64.6400, "country": "VG"},
+  "Tether Treasury (BTC)": {"lat": 18.4207, "lon": -64.6400, "country": "VG"},
+  "Tether (USDT SOL)": {"lat": 18.4207, "lon": -64.6400, "country": "VG"},
+  "Circle (USDC)": {"lat": 42.3601, "lon": -71.0589, "country": "US"},
+  "Circle (USDC SOL)": {"lat": 42.3601, "lon": -71.0589, "country": "US"},
+  "Paxos (BUSD)": {"lat": 40.7128, "lon": -74.0060, "country": "US"},
+
+  "vitalik.eth": {"lat": 43.6532, "lon": -79.3832, "country": "CA"},
+  "Justin Sun": {"lat": 1.3521, "lon": 103.8198, "country": "SG"},
+  "Ethereum Foundation": {"lat": 47.1661, "lon": 8.5155, "country": "CH"},
+  "Wintermute": {"lat": 51.5074, "lon": -0.1278, "country": "GB"},
+  "Jump Trading": {"lat": 41.8781, "lon": -87.6298, "country": "US"},
+  "Jump Crypto (SOL)": {"lat": 41.8781, "lon": -87.6298, "country": "US"},
+  "Paradigm": {"lat": 37.7749, "lon": -122.4194, "country": "US"},
+  "Galaxy Digital": {"lat": 40.7128, "lon": -74.0060, "country": "US"},
+
+  "Arbitrum Bridge": {"lat": 40.7128, "lon": -74.0060, "country": "US"},
+  "Optimism Bridge": {"lat": 40.7128, "lon": -74.0060, "country": "US"},
+  "Polygon Bridge": {"lat": 12.9716, "lon": 77.5946, "country": "IN"},
+  "Base Bridge": {"lat": 37.7749, "lon": -122.4194, "country": "US"},
+  "zkSync Bridge": {"lat": 47.3769, "lon": 8.5417, "country": "CH"},
+  "Blast Bridge": {"lat": 40.7128, "lon": -74.0060, "country": "US"},
+  "Wormhole": {"lat": 37.7749, "lon": -122.4194, "country": "US"},
+
+  "Lido stETH": {"lat": 47.3769, "lon": 8.5417, "country": "CH"},
+  "Rocket Pool rETH": {"lat": 51.5074, "lon": -0.1278, "country": "GB"},
+  "WETH Contract": {"lat": 47.3769, "lon": 8.5417, "country": "CH"},
+
+  "MicroStrategy": {"lat": 38.9072, "lon": -77.0369, "country": "US"},
+  "Block.one": {"lat": 19.2869, "lon": -81.3674, "country": "KY"},
+  "Satoshi (dormant)": {"lat": 35.6762, "lon": 139.6503, "country": "JP"},
+  "US Gov Seized (Silk Road)": {"lat": 38.9072, "lon": -77.0369, "country": "US"},
+  "Mt. Gox Trustee": {"lat": 35.6762, "lon": 139.6503, "country": "JP"},
+  "Grayscale GBTC": {"lat": 41.1670, "lon": -73.2048, "country": "US"},
+  "Marathon Digital": {"lat": 26.1224, "lon": -80.1373, "country": "US"},
+
+  "Jupiter Aggregator": {"lat": 37.7749, "lon": -122.4194, "country": "US"},
+  "Raydium Authority": {"lat": 37.7749, "lon": -122.4194, "country": "US"},
+  "Marinade Finance": {"lat": 47.3769, "lon": 8.5417, "country": "CH"},
+  "Jito Staking": {"lat": 40.7128, "lon": -74.0060, "country": "US"},
+
+  "Solana Foundation": {"lat": 47.3769, "lon": 8.5417, "country": "CH"},
+  "Alameda Remains": {"lat": 25.0343, "lon": -77.3963, "country": "BS"}
+}

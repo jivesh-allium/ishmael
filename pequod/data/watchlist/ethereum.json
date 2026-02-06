@@ -1,0 +1,61 @@
+{
+  "chain": "ethereum",
+  "addresses": {
+    "exchanges": {
+      "Binance Hot 1": "0x28c6c06298d514db089934071355e5743bf21d60",
+      "Binance Hot 2": "0x21a31ee1afc51d94c2efccaa2092ad1028285549",
+      "Binance Hot 3": "0xdfd5293d8e347dfe59e90efd55b2956a1343963d",
+      "Binance Cold": "0xbe0eb53f46cd790cd13851d5eff43d12404d33e8",
+      "Coinbase Hot": "0x71660c4005ba85c37ccec55d0c4493e66fe775d3",
+      "Coinbase Prime": "0xa9d1e08c7793af67e9d92fe308d5697fb81d3e43",
+      "Coinbase Commerce": "0xf6874c88757721a02f47592140905c4336dfbc61",
+      "Kraken Hot": "0x2910543af39aba0cd09dbb2d50200b3e800a63d2",
+      "Kraken Cold": "0x53d284357ec70ce289d6d64134dfac8e511c8a3d",
+      "OKX Hot 1": "0x98ec059dc3adfbdd63429454aeb0c990fba4a128",
+      "OKX Hot 2": "0x6cc5f688a315f3dc28a7781717a9a798a59fda7b",
+      "Bitfinex Hot": "0x1151314c646ce4e0efd76d1af4760ae66a9fe30f",
+      "Bitfinex Cold": "0x876eabf441b2ee5b5b0554fd502a8e0600950cfa",
+      "Bybit Hot": "0xf89d7b9c864f589bbf53a82105107622b35eaa40",
+      "Gate.io Hot": "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+      "Gemini Hot": "0xd24400ae8bfebb18ca49be86258a3c749cf46853",
+      "Huobi Hot": "0xab5c66752a9e8167967685f1450532fb96d5d24f",
+      "KuCoin Hot": "0xd6216fc19db775df9774a6e33526131da7d19a2c",
+      "Crypto.com Hot": "0x6262998ced04146fa42253a5c0af90ca02dfd2a3"
+    },
+    "treasuries": {
+      "Uniswap Treasury": "0x1a9c8182c09f50c8318d769245bea52c32be35bc",
+      "Aave Treasury": "0x464c71f6c2f760dda6093dcb91c24c39e5d6e18c",
+      "Lido Treasury": "0x3e40d73eb977dc6a537af587d48316fee66e9c8c",
+      "MakerDAO Pause Proxy": "0xbe8e3e3618f7474f8cb1d074a26affef007e98fb",
+      "Compound Treasury": "0x2775b1c75658be0f640272ccb8c72ac986009e38"
+    },
+    "stablecoin_issuers": {
+      "Tether Treasury": "0x5754284f345afc66a98fbb0a0afe71e0f007b949",
+      "Circle (USDC)": "0x55fe002aeff02f77364de339a1292923a15844b8",
+      "Paxos (BUSD)": "0x5f65f7b609678448494de4c87521cdf6cef1e932"
+    },
+    "whales": {
+      "vitalik.eth": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+      "Justin Sun": "0x3ddfa8ec3052539b6c9549f12cea2c295cff5296",
+      "Ethereum Foundation": "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae",
+      "Wintermute": "0x0000006daea1723962647b7e189d311d757fb793",
+      "Jump Trading": "0x9507c04b10486547584c37bcbd931b2a4fee9a41",
+      "Paradigm": "0xc56fefd1028b0534bfadcdb580d3519b5586246e",
+      "Galaxy Digital": "0x7a16ff8270133f063aab6c9977183d9e72835428"
+    },
+    "bridges": {
+      "Arbitrum Bridge": "0x8315177ab297ba92a06054ce80a67ed4dbd7ed3a",
+      "Optimism Bridge": "0x99c9fc46f92e8a1c0dec1b1747d010903e884be1",
+      "Polygon Bridge": "0xa0c68c638235ee32657e8f720a23cec1bfc6c9a8",
+      "Base Bridge": "0x3154cf16ccdb4c6d922629664174b904d80f2c35",
+      "zkSync Bridge": "0x32400084c286cf3e17e7b677ea9583e60a000324",
+      "Blast Bridge": "0x5f6ae08b8aeb7078cf2f96afb089d7c9f51da47d",
+      "Wormhole": "0x3ee18b2214aff97000d974cf647e7c347e8fa585"
+    },
+    "wrapped_staking": {
+      "Lido stETH": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+      "Rocket Pool rETH": "0xae78736cd615f374d3085123a210448e74fc6393",
+      "WETH Contract": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+    }
+  }
+}

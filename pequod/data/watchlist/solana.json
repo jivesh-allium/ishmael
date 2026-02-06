@@ -1,0 +1,28 @@
+{
+  "chain": "solana",
+  "addresses": {
+    "exchanges": {
+      "Binance Hot (SOL)": "5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9",
+      "Coinbase Hot (SOL)": "H8sMJSCQxfKiFTCfDR3DUMLPwcRbM61LGFJ8N4dK3WjS",
+      "Kraken Hot (SOL)": "FWznbcNXWQuHTawe9RxvQ2LdCENssh12dsznf4RiWB7o",
+      "OKX Hot (SOL)": "5VCwKtCXgCDuQosUaGUkpRE5hzieAb3ByMJoYFFjgFqK",
+      "FTX Estate": "CuieVDEDtLo7FypA9SbLM9saXFdb1dsshEkyErMqkRQq",
+      "Bybit Hot (SOL)": "AC5RDfQFmDS1deWZos921JfqscXdByf8BKHs5ACWjtW2"
+    },
+    "defi_protocols": {
+      "Jupiter Aggregator": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
+      "Raydium Authority": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
+      "Marinade Finance": "MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD",
+      "Jito Staking": "Jito4APyf642JPZPx3hGc6WWJ8zPKtRbRs4P815Awbb"
+    },
+    "whales": {
+      "Solana Foundation": "GK2zqSsXLA2rwVZk347RYhh6jJXRsAkGhth2nR2pg8iy",
+      "Jump Crypto (SOL)": "27WFuYAVCNjYeg8gKwRRah2JEVBLfJJNhSCkVgPRE1Nq",
+      "Alameda Remains": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+    },
+    "stablecoin_issuers": {
+      "Circle (USDC SOL)": "FSxJ85FXVsXSr51SeWf9ciJWTcRnqKFSmBgRDeL3KyWw",
+      "Tether (USDT SOL)": "Q6XprfkF8RQQKoQVG33xT88H7wi8Uk1B1CC7YAs69Gi"
+    }
+  }
+}
