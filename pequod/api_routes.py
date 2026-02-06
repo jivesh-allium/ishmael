@@ -22,6 +22,12 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api")
 
+
+@router.get("/health")
+async def health():
+    return {"status": "ok"}
+
+
 # References set by server startup
 _watchlist: Watchlist | None = None
 _geo_map: GeoMap | None = None
