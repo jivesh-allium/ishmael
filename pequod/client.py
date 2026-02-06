@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 
 import httpx
 
-from pequod.models import PricesResponse, TransactionsResponse
+from pequod.models import PriceHistoryPoint, PricesResponse, TransactionsResponse
 
 logger = logging.getLogger(__name__)
 
@@ -56,15 +56,17 @@ class AlliumClient:
                 params=params,
                 json=addresses,
             )
-            if resp.status_code < 500:
+            if resp.status_code not in (429, *range(500, 600)):
                 break
             last_exc = httpx.HTTPStatusError(
-                f"Server error {resp.status_code}", request=resp.request, response=resp,
+                f"HTTP {resp.status_code}", request=resp.request, response=resp,
             )
             if attempt < MAX_RETRIES:
-                wait = RETRY_BACKOFF * (2 ** attempt)
+                # 429: respect Retry-After header, else use exponential backoff
+                retry_after = resp.headers.get("Retry-After")
+                wait = float(retry_after) if retry_after else RETRY_BACKOFF * (2 ** attempt)
                 logger.warning(
-                    "Allium 5xx (%s), retrying in %.0fs (attempt %d/%d)",
+                    "Allium %s, retrying in %.1fs (attempt %d/%d)",
                     resp.status_code, wait, attempt + 1, MAX_RETRIES,
                 )
                 await asyncio.sleep(wait)
@@ -81,6 +83,35 @@ class AlliumClient:
             if tx.block_timestamp.replace(tzinfo=timezone.utc) >= cutoff
         ]
         return parsed
+
+    async def get_price_history(
+        self,
+        token_address: str,
+        chain: str = "ethereum",
+        hours: int = 24,
+        granularity: str = "1h",
+    ) -> list[PriceHistoryPoint]:
+        """Fetch historical price data for a token.
+
+        Args:
+            token_address: contract address of the token.
+            chain: blockchain network (e.g. "ethereum", "solana").
+            hours: lookback window in hours.
+            granularity: time bucket size ("1h", "1d", etc.).
+        """
+        now = datetime.now(timezone.utc)
+        start = now - timedelta(hours=hours)
+        body = {
+            "addresses": [{"chain": chain, "token_address": token_address}],
+            "start_timestamp": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "end_timestamp": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "time_granularity": granularity,
+        }
+        resp = await self._client.post("/prices/history", json=body)
+        resp.raise_for_status()
+        data = resp.json()
+        items = data.get("items", data if isinstance(data, list) else [])
+        return [PriceHistoryPoint.model_validate(item) for item in items]
 
     async def get_prices(
         self,

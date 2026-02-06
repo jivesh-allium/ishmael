@@ -10,6 +10,9 @@ interface Props {
   alerts: WhaleAlert[];
   onClickAlert: (whale: WhaleAlert, pixel: { x: number; y: number }) => void;
   connected: boolean;
+  tokenFilter: string | null;
+  availableTokens: string[];
+  onTokenFilter: (t: string | null) => void;
 }
 
 function timeAgo(timestamp: string): string {
@@ -99,11 +102,18 @@ function AlertEntry({
   );
 }
 
-export function AlertFeed({ alerts, onClickAlert, connected }: Props) {
+export function AlertFeed({
+  alerts,
+  onClickAlert,
+  connected,
+  tokenFilter,
+  availableTokens,
+  onTokenFilter,
+}: Props) {
   return (
     <div className="absolute right-0 top-0 bottom-0 w-72 bg-[#0a1628]/95 backdrop-blur-sm border-l border-[#1a3a5c] flex flex-col z-20">
       {/* Header */}
-      <div className="p-4 border-b border-[#1a3a5c]">
+      <div className="p-4 pb-2 border-b border-[#1a3a5c]">
         <div className="flex items-center justify-between">
           <h2
             className="text-lg font-bold text-amber-100"
@@ -125,6 +135,37 @@ export function AlertFeed({ alerts, onClickAlert, connected }: Props) {
         <p className="text-xs text-slate-500 mt-1">
           {alerts.length} whale sightings
         </p>
+
+        {/* Token filter pills */}
+        {availableTokens.length > 0 && (
+          <div className="flex gap-1.5 overflow-x-auto mt-2 pb-1 scrollbar-hide">
+            <button
+              onClick={() => onTokenFilter(null)}
+              className={`flex-shrink-0 px-2.5 py-1 rounded text-xs font-medium transition-colors border ${
+                tokenFilter === null
+                  ? "bg-amber-700/50 text-amber-100 border-amber-600/60"
+                  : "text-slate-400 border-[#1a3a5c]/60 hover:text-amber-200 hover:border-amber-700/40"
+              }`}
+            >
+              All
+            </button>
+            {availableTokens.map((sym) => (
+              <button
+                key={sym}
+                onClick={() =>
+                  onTokenFilter(tokenFilter === sym ? null : sym)
+                }
+                className={`flex-shrink-0 px-2.5 py-1 rounded text-xs font-medium transition-colors border ${
+                  tokenFilter === sym
+                    ? "bg-amber-700/50 text-amber-100 border-amber-600/60"
+                    : "text-slate-400 border-[#1a3a5c]/60 hover:text-amber-200 hover:border-amber-700/40"
+                }`}
+              >
+                {sym}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Alert list */}

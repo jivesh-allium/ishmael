@@ -4,7 +4,8 @@ import { OceanMap } from "./components/OceanMap";
 import { AlertFeed } from "./components/AlertFeed";
 import { DetailPanel } from "./components/DetailPanel";
 import { ShipsClock } from "./components/ShipsClock";
-import { CrowsNest } from "./components/CrowsNest";
+import { ExchangeFlow } from "./components/ExchangeFlow";
+import { PriceChart } from "./components/PriceChart";
 import { Leaderboard } from "./components/Leaderboard";
 import { Spyglass } from "./components/Spyglass";
 import { WhitenessModal } from "./components/WhitenessModal";
@@ -27,6 +28,27 @@ export default function App() {
   const mobyTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [toastQuote, setToastQuote] = useState<string | null>(null);
   const [timeWindow, setTimeWindow] = useState<number | null>(null);
+  const [tokenFilter, setTokenFilter] = useState<string | null>(null);
+  const [bottomPanelH, setBottomPanelH] = useState(160);
+  const resizing = useRef(false);
+  const resizeStartY = useRef(0);
+  const resizeStartH = useRef(0);
+
+  // Bottom panel resize handlers
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!resizing.current) return;
+      const delta = resizeStartY.current - e.clientY;
+      setBottomPanelH(Math.max(60, Math.min(400, resizeStartH.current + delta)));
+    };
+    const onUp = () => { resizing.current = false; };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, []);
 
   // Load initial data + periodically refresh map (picks up discovered entities)
   useEffect(() => {
@@ -39,7 +61,25 @@ export default function App() {
     const mapInterval = setInterval(loadMap, 30_000);
 
     fetchWhales(500)
-      .then((data) => setWhales(data.alerts))
+      .then((data) => {
+        setWhales(data.alerts);
+        // Eagerly prefetch 24h history in the background so it's ready
+        fetchWhaleHistory(1440)
+          .then((hist) => {
+            if (!hist.alerts.length) return;
+            setWhales((prev) => {
+              const existing = new Set(prev.map((w) => `${w.tx_hash}:${w.alert_type}`));
+              const fresh = hist.alerts.filter(
+                (w) => !existing.has(`${w.tx_hash}:${w.alert_type}`)
+              );
+              if (!fresh.length) return prev;
+              return [...prev, ...fresh]
+                .sort((a, b) => (b.block_timestamp > a.block_timestamp ? 1 : -1))
+                .slice(0, 2000);
+            });
+          })
+          .catch((err) => console.error("Failed to prefetch history:", err));
+      })
       .catch((err) => console.error("Failed to load whales:", err));
 
     return () => clearInterval(mapInterval);
@@ -59,6 +99,15 @@ export default function App() {
     fetchWhaleHistory(timeWindow)
       .then((data) => {
         if (cancelled) return;
+        // Log debug info from the backend so we can see what happened
+        if (data.debug) {
+          const d = data.debug as Record<string, unknown>;
+          const errs = Array.isArray(d.errors) ? d.errors : [];
+          console.log(
+            `[History] lookback=${timeWindow}m | txs=${d.tx_count} raw_alerts=${d.raw_alerts} below_threshold=${d.below_threshold} final=${d.final} errors=${errs.length}`,
+            errs.length ? errs : ""
+          );
+        }
         setWhales((prev) => {
           // Merge: keep existing (live) alerts + add any historical ones not already present
           const existing = new Set(prev.map((w) => `${w.tx_hash}:${w.alert_type}`));
@@ -88,6 +137,29 @@ export default function App() {
       return new Date(ts).getTime() >= cutoff;
     });
   }, [whales, timeWindow]);
+
+  const availableTokens = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const w of filteredWhales) {
+      const sym =
+        w.asset_symbol ?? w.asset_bought_symbol ?? w.asset_sold_symbol;
+      if (sym) counts[sym] = (counts[sym] ?? 0) + 1;
+    }
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([sym]) => sym);
+  }, [filteredWhales]);
+
+  const displayWhales = useMemo(() => {
+    if (!tokenFilter) return filteredWhales;
+    return filteredWhales.filter(
+      (w) =>
+        w.asset_symbol === tokenFilter ||
+        w.asset_bought_symbol === tokenFilter ||
+        w.asset_sold_symbol === tokenFilter
+    );
+  }, [filteredWhales, tokenFilter]);
 
   const handleClickAlert = useCallback(
     (whale: WhaleAlert, pixel: { x: number; y: number }) => {
@@ -173,7 +245,7 @@ export default function App() {
       {/* Main map canvas */}
       <OceanMap
         entities={entities}
-        whales={filteredWhales}
+        whales={displayWhales}
         selectedWhale={selectedWhale}
         selectedIsland={selectedIsland}
         onSelectWhale={handleSelectWhale}
@@ -188,13 +260,42 @@ export default function App() {
 
       {/* Right panel: alert feed */}
       <AlertFeed
-        alerts={filteredWhales}
+        alerts={displayWhales}
         onClickAlert={handleClickAlert}
         connected={connected}
+        tokenFilter={tokenFilter}
+        availableTokens={availableTokens}
+        onTokenFilter={setTokenFilter}
       />
 
-      {/* Bottom-left stats bar */}
-      <CrowsNest whales={filteredWhales} />
+      {/* Bottom panel: price chart + exchange flow (resizable) */}
+      <div
+        className="absolute bottom-0 left-0 right-72 z-20 bg-[#0a1628]/90 backdrop-blur-sm border-t border-[#1a3a5c]/40 flex flex-col"
+        style={{ height: bottomPanelH }}
+      >
+        {/* Drag handle */}
+        <div
+          className="h-2 cursor-ns-resize flex items-center justify-center flex-shrink-0 hover:bg-[#1a3a5c]/30 transition-colors"
+          onMouseDown={(e) => {
+            resizing.current = true;
+            resizeStartY.current = e.clientY;
+            resizeStartH.current = bottomPanelH;
+            e.preventDefault();
+          }}
+        >
+          <div className="w-8 h-0.5 rounded bg-[#1a3a5c]/80" />
+        </div>
+        <div className="flex flex-1 min-h-0 overflow-hidden">
+          {/* Price Chart — left side */}
+          <div className="w-[45%] border-r border-[#1a3a5c]/30 overflow-hidden">
+            <PriceChart tokenFilter={tokenFilter} whales={displayWhales} />
+          </div>
+          {/* Exchange Flow — right side */}
+          <div className="flex-1 overflow-y-auto">
+            <ExchangeFlow whales={displayWhales} />
+          </div>
+        </div>
+      </div>
 
       {/* Detail panel (left side) */}
       <DetailPanel

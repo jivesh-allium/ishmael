@@ -140,7 +140,7 @@ export function OceanMap({
     };
   }, []);
 
-  // Camera normalization: X + Y both clamped (no infinite scroll)
+  // Camera normalization: loose clamp with generous padding
   const clampCamera = useCallback(() => {
     const app = appRef.current;
     if (!app) return;
@@ -148,21 +148,15 @@ export function OceanMap({
     const screenW = app.screen.width;
     const screenH = app.screen.height;
 
-    // X: clamp so map doesn't scroll beyond edges
-    const mapW = MAP_WIDTH * s;
-    if (mapW <= screenW) {
-      camera.current.x = (screenW - mapW) / 2;
-    } else {
-      camera.current.x = Math.min(0, Math.max(-(mapW - screenW), camera.current.x));
-    }
+    // Allow dragging up to 40% of the screen past any edge
+    const padX = screenW * 0.4;
+    const padY = screenH * 0.4;
 
-    // Y: clamp so map always fills viewport vertically
+    const mapW = MAP_WIDTH * s;
     const mapH = MAP_HEIGHT * s;
-    if (mapH <= screenH) {
-      camera.current.y = (screenH - mapH) / 2;
-    } else {
-      camera.current.y = Math.min(0, Math.max(-(mapH - screenH), camera.current.y));
-    }
+
+    camera.current.x = Math.min(padX, Math.max(-(mapW - screenW + padX), camera.current.x));
+    camera.current.y = Math.min(padY, Math.max(-(mapH - screenH + padY), camera.current.y));
   }, []);
 
   // Update camera from pan/zoom
@@ -224,8 +218,10 @@ export function OceanMap({
       }
 
       const factor = e.deltaY > 0 ? 0.92 : 1.08;
-      const minScale = appRef.current ? appRef.current.screen.height / MAP_HEIGHT : 0.5;
-      const newScale = Math.min(5, Math.max(minScale, camera.current.scale * factor));
+      const minScale = appRef.current
+        ? Math.min(0.3, appRef.current.screen.height / MAP_HEIGHT * 0.5)
+        : 0.3;
+      const newScale = Math.min(8, Math.max(minScale, camera.current.scale * factor));
       const ratio = newScale / camera.current.scale;
 
       // Zoom toward mouse cursor

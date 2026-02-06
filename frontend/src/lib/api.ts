@@ -24,11 +24,27 @@ export async function fetchWhaleDetail(
 
 export async function fetchWhaleHistory(
   lookbackMinutes: number
-): Promise<WhalesResponse> {
+): Promise<WhalesResponse & { debug?: Record<string, unknown> }> {
   const res = await fetch(
     `${BASE}/api/whales/history?lookback_minutes=${lookbackMinutes}`
   );
   if (!res.ok) throw new Error(`Failed to fetch whale history: ${res.status}`);
+  return res.json();
+}
+
+export interface PricePoint {
+  timestamp: string;
+  price: number;
+}
+
+export async function fetchPriceHistory(
+  symbol: string,
+  hours?: number
+): Promise<{ symbol: string; prices: PricePoint[] }> {
+  const params = new URLSearchParams({ symbol });
+  if (hours) params.set("hours", String(hours));
+  const res = await fetch(`${BASE}/api/prices/history?${params}`);
+  if (!res.ok) throw new Error(`Failed to fetch price history: ${res.status}`);
   return res.json();
 }
 

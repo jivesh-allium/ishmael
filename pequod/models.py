@@ -268,6 +268,15 @@ class PricesResponse(BaseModel):
     cursor: str | None = None
 
 
+class PriceHistoryPoint(BaseModel):
+    timestamp: datetime
+    price: float
+    open: float | None = None
+    high: float | None = None
+    close: float | None = None
+    low: float | None = None
+
+
 # ---------------------------------------------------------------------------
 # Internal WhaleAlert model
 # ---------------------------------------------------------------------------
