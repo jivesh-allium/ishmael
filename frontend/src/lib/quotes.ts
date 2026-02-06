@@ -55,15 +55,10 @@ And of all these things the Albino whale was the symbol. Wonder ye then at the f
 
 /** Chapter 49 excerpt — the FAQ / book button. */
 export const CHAPTER_49 = `There are certain queer times and occasions in this strange mixed affair we call life when a man takes this whole universe for a vast practical joke, though the wit thereof he but dimly discerns, and more than suspects that the joke is at nobody's expense but his own.
-
-However, nothing dispirited, and nothing daunted, Queequeg and I took our seats in the whale-boat's stern, and gave the word to the others to shove off.
-
-That unsounded ocean you gasp in, is Life; those sharks, your foes; those spades, your friends; and what between sharks and spades you are in a sad pickle and peril, poor lad.
-
-But courage! there is good cheer in store for you, Queequeg. For now, as with blue lips and bloodshot eyes the exhausted savage at last climbs up the chains and stands all dripping and involuntarily trembling over the side; the steward hurries to present him with his well-known purple woollen shirt. There, take it, Queequeg; and let the monkey-jacket, which I never like to, be thy shroud; get into thy coffin, and die in peace, poor devil!
-
-I was called upon to decide. Queequeg and I put our heads together, and a bold resolve was reached.
-
+However, nothing dispirits, and nothing seems worth while disputing. 
+He bolts down all events, all creeds, and beliefs, and persuasions, all hard things visible and invisible, never mind how knobby; as an ostrich of potent digestion gobbles down bullets and gun flints. 
+And as for small difficulties and worryings, prospects of sudden disaster, peril of life and limb; all these, and death itself, seem to him only sly, good-natured hits, and jolly punches in the side bestowed by the unseen and unaccountable old joker.
+That odd sort of wayward mood I am speaking of, comes over a man only in some time of extreme tribulation; it comes in the very midst of his earnestness, so that what just before might have seemed to him a thing most momentous, now seems but a part of the general joke.
 There is nothing like the perils of whaling to breed this free and easy sort of genial, desperado philosophy; and with it I now regarded this whole voyage of the Pequod, and the great White Whale its object.
 
 "Queequeg," said I, when they had dragged me, the last man, to the deck, and I was still shaking myself in my jacket to fling off the water; "Queequeg, my fine friend, does this sort of thing often happen?" Without much emotion, though soaked through just like me, he gave me to understand that such things did often happen.
@@ -76,7 +71,9 @@ There is nothing like the perils of whaling to breed this free and easy sort of 
 
 "Can't you twist that smaller?" said Flask. "Yes, that's the law. I should like to see a boat's crew backing water up to a whale face foremost. Ha, ha! the whale would give them squint for squint, mind that!"
 
-Here then, from three impartial witnesses, I had a deliberate statement of the entire case. Considering, therefore, that squalls and capsizings in the water and consequent bivouacks on the deep, were matters of common occurrence in this kind of life; considering that the superlatively critical instant of going on to the whale I must resign my life into the hands of him who steered the boat — oftentimes a fellow who at that very moment is in his impetuousness upon the point of scuttling the craft with his own frantic stampings; considering that the particular disaster to our own particular boat was chiefly to be imputed to Starbuck's driving on to his whale almost in the teeth of a squall, and considering that Starbuck, notwithstanding, was famous for his great heedfulness in the fishery; considering that I belonged to this uncommonly prudent Starbuck's boat; and finally considering in what a devil's chase I was implicated, touching the White Whale: taking all things together, I say, I thought I might as well go below and make a rough draft of my will.
+Here then, from three impartial witnesses, I had a deliberate statement of the entire case. Considering, therefore, that squalls and capsizings in the water and consequent bivouacks on the deep, were matters of common occurrence in this kind of life; considering that at the superlatively critical instant of going on to the whale I must resign my life into the hands of him who steered the boat—oftentimes a fellow who at that very moment is in his impetuousness upon the point of scuttling the craft with his own frantic stampings; considering that the particular disaster to our own particular boat was chiefly to be imputed to Starbuck's driving on to his whale almost in the teeth of a squall, and considering that Starbuck, notwithstanding, was famous for his great heedfulness in the fishery; considering that I belonged to this uncommonly prudent Starbuck's boat; and finally considering in what a devil's chase I was implicated, touching the White Whale: taking all things together, I say, I thought I might as well go below and make a rough draft of my will. "Queequeg," said I, "come along, you shall be my lawyer, executor, and legatee."
 
-"Queequeg," said I, "come along, you shall be my lawyer, executor, and legatee."`;
+It may seem strange that of all men sailors should be tinkering at their last wills and testaments, but there are no people in the world more fond of that diversion. This was the fourth time in my nautical life that I had done the same thing. After the ceremony was concluded upon the present occasion, I felt all the easier; a stone was rolled away from my heart. Besides, all the days I should now live would be as good as the days that Lazarus lived after his resurrection; a supplementary clean gain of so many months or weeks as the case might be. I survived myself; my death and burial were locked up in my chest. I looked round me tranquilly and contentedly, like a quiet ghost with a clean conscience sitting inside the bars of a snug family vault.
+
+Now then, thought I, unconsciously rolling up the sleeves of my frock, here goes for a cool, collected dive at death and destruction, and the devil fetch the hindmost. "`;
 

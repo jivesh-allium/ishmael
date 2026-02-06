@@ -6,6 +6,12 @@ const EXPLORER_BASE: Record<string, string> = {
   arbitrum: "https://arbiscan.io/tx/",
   optimism: "https://optimistic.etherscan.io/tx/",
   base: "https://basescan.org/tx/",
+  avalanche: "https://snowtrace.io/tx/",
+  bsc: "https://bscscan.com/tx/",
+  linea: "https://lineascan.build/tx/",
+  scroll: "https://scrollscan.com/tx/",
+  zksync: "https://explorer.zksync.io/tx/",
+  blast: "https://blastscan.io/tx/",
 };
 
 const EXPLORER_NAMES: Record<string, string> = {
@@ -16,6 +22,12 @@ const EXPLORER_NAMES: Record<string, string> = {
   arbitrum: "Arbiscan",
   optimism: "OP Etherscan",
   base: "Basescan",
+  avalanche: "Snowtrace",
+  bsc: "BscScan",
+  linea: "LineaScan",
+  scroll: "ScrollScan",
+  zksync: "zkSync Explorer",
+  blast: "BlastScan",
 };
 
 export function getExplorerTxUrl(

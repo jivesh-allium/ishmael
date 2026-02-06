@@ -6,13 +6,13 @@ import type { WhaleAlert } from "../types/whale";
 import { ALERT_COLORS } from "../types/whale";
 import { formatUsd } from "../lib/api";
 
-// Resting alpha for persistent display
-const RESTING_ALPHA = 0.55;
-
 interface Props {
   whale: WhaleAlert;
   world: Container;
   onClick: () => void;
+  xOffset?: number;
+  age?: number;
+  rank?: number; // 0-based index in the visible list (for label visibility)
 }
 
 /** Quadratic Bezier point at parameter t. */
@@ -47,6 +47,7 @@ function bezierTangent(
 function controlPoint(
   from: { x: number; y: number },
   to: { x: number; y: number },
+  rankOffset = 0,
 ): { x: number; y: number } {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
@@ -61,38 +62,67 @@ function controlPoint(
   const midY = (from.y + to.y) / 2;
   const nx = -dy / dist;
   const ny = dx / dist;
-  const offset = Math.min(dist * 0.3, 120);
+  const offset = Math.min(dist * 0.3, 120) + rankOffset * 3;
   return { x: midX + nx * offset, y: midY + ny * offset };
 }
 
-export function TransferLine({ whale, world, onClick }: Props) {
+export function TransferLine({ whale, world, onClick, xOffset = 0, age, rank = 0 }: Props) {
   const containerRef = useRef<Container | null>(null);
   const onClickRef = useRef(onClick);
   onClickRef.current = onClick;
 
   useEffect(() => {
-    // Resolve coordinates with fallbacks
-    const toLat = whale.to_lat ?? whale.from_lat ?? 0;
-    const toLon = whale.to_lon ?? whale.from_lon ?? -160;
-    const fromLat = whale.from_lat ?? whale.to_lat;
-    const fromLon = whale.from_lon ?? whale.to_lon;
-    const hasArc = fromLat != null && fromLon != null;
+    // Resolve coordinates — treat missing geo as "same location" (self-transfer loop)
+    const toHasGeo = whale.to_lat != null && whale.to_lon != null;
+    const fromHasGeo = whale.from_lat != null && whale.from_lon != null;
 
-    const to = geoToPixel(toLat, toLon);
-    const from = hasArc ? geoToPixel(fromLat, fromLon) : to;
+    // Anchor to whichever end has geo; if neither, use map center
+    const anchorLat = fromHasGeo ? whale.from_lat!
+      : toHasGeo ? whale.to_lat!
+      : 20;
+    const anchorLon = fromHasGeo ? whale.from_lon!
+      : toHasGeo ? whale.to_lon!
+      : 0;
+
+    // If both ends have geo, draw an arc; otherwise self-transfer loop at the anchor
+    const bothHaveGeo = toHasGeo && fromHasGeo;
+
+    const from = geoToPixel(
+      fromHasGeo ? whale.from_lat! : anchorLat,
+      fromHasGeo ? whale.from_lon! : anchorLon,
+    );
+    const to = bothHaveGeo
+      ? geoToPixel(whale.to_lat!, whale.to_lon!)
+      : { x: from.x, y: from.y };
+
+    // Per-line endpoint jitter to prevent convergence at the same pixel
+    const lineHash = (whale.tx_hash + whale.alert_type)
+      .split("").reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, 0);
+    const absHash = Math.abs(lineHash);
+    const jitterX = (absHash % 17) - 8;
+    const jitterY = ((absHash * 7) % 17) - 8;
+    from.x += jitterX; from.y += jitterY;
+    to.x += jitterX * 0.7; to.y += jitterY * 0.7;
+
     const dx = to.x - from.x;
     const dy = to.y - from.y;
-    const isSelfTransfer = Math.sqrt(dx * dx + dy * dy) < 5;
-    const cp = controlPoint(from, to);
+    const isSelfTransfer = Math.sqrt(dx * dx + dy * dy) < 5 || !bothHaveGeo;
+    const cp = controlPoint(from, to, rank);
     const selfTo = isSelfTransfer ? { x: from.x, y: from.y + 2 } : to;
+
+    // Apply xOffset to all X coords
+    from.x += xOffset;
+    to.x += xOffset;
+    cp.x += xOffset;
+    selfTo.x += xOffset;
 
     const color = ALERT_COLORS[whale.alert_type] ?? 0x4488ff;
     const usd = whale.usd_value;
 
-    // Line width: 1-6px based on USD value (log scale)
-    const lineWidth = Math.max(1, Math.min(6, 1 + 5 * Math.log10(usd / 500_000)));
-    // Whale count: 1-7 based on USD value (log scale)
-    const whaleCount = Math.max(1, 3 + Math.round(4 * Math.min(1, Math.log10(usd / 500_000) / 3)));
+    // Line width: 1-4px based on USD value (log scale) — thinner than before
+    const lineWidth = Math.max(1, Math.min(4, 1 + 3 * Math.log10(usd / 500_000)));
+    // Single whale sprite per line (only 2 for very large transfers)
+    const whaleCount = usd >= 50_000_000 ? 2 : 1;
 
     // Root container (interactive)
     const root = new Container();
@@ -103,50 +133,60 @@ export function TransferLine({ whale, world, onClick }: Props) {
       onClickRef.current();
     });
     containerRef.current = root;
-    root.alpha = RESTING_ALPHA;
+
+    // Age-based alpha decay: ~0.55 fresh, ~0.30 after 1h, ~0.20 after 4h, floor at 0.15
+    const ageMinutes = (age ?? 0) / 60_000;
+    const alpha = 0.15 + 0.40 * Math.exp(-ageMinutes / 60);
+    root.alpha = alpha;
+
     world.addChild(root);
 
-    // --- Glow (wider, dimmer) — drawn synchronously ---
-    const glow = new Graphics();
-    glow.setStrokeStyle({ width: lineWidth * 3, color, alpha: 0.15 });
-    glow.moveTo(from.x, from.y);
+    // --- Glow — only for fresh/large transfers ---
+    if (ageMinutes < 30 && usd >= 5_000_000) {
+      const glow = new Graphics();
+      glow.setStrokeStyle({ width: lineWidth * 2, color, alpha: 0.04 });
+      glow.moveTo(from.x, from.y);
+      for (let i = 1; i <= 20; i++) {
+        const pt = bezierAt(i / 20, from, cp, selfTo);
+        glow.lineTo(pt.x, pt.y);
+      }
+      glow.stroke();
+      root.addChild(glow);
+    }
+
+    // --- Main line ---
+    const line = new Graphics();
+    line.setStrokeStyle({ width: Math.max(1.5, lineWidth), color });
+    line.moveTo(from.x, from.y);
     for (let i = 1; i <= 24; i++) {
       const pt = bezierAt(i / 24, from, cp, selfTo);
-      glow.lineTo(pt.x, pt.y);
-    }
-    glow.stroke();
-    root.addChild(glow);
-
-    // --- Main line — drawn synchronously ---
-    const line = new Graphics();
-    line.setStrokeStyle({ width: Math.max(2, lineWidth), color });
-    line.moveTo(from.x, from.y);
-    for (let i = 1; i <= 32; i++) {
-      const pt = bezierAt(i / 32, from, cp, selfTo);
       line.lineTo(pt.x, pt.y);
     }
     line.stroke();
     root.addChild(line);
 
-    // --- USD label at curve midpoint ---
-    const midPt = bezierAt(0.5, from, cp, selfTo);
-    const label = new Text({
-      text: formatUsd(usd),
-      style: {
-        fontFamily: "Inter, sans-serif",
-        fontSize: 11,
-        fill: 0xffffff,
-        fontWeight: "700",
-        dropShadow: {
-          alpha: 0.9,
-          blur: 3,
-          distance: 1,
+    // --- USD label — only show on top 6 by rank and only at offset=0 ---
+    if (rank < 6 && xOffset === 0) {
+      const midPt = bezierAt(0.5, from, cp, selfTo);
+      const label = new Text({
+        text: formatUsd(usd),
+        style: {
+          fontFamily: "Inter, sans-serif",
+          fontSize: 8,
+          fill: 0xffffff,
+          fontWeight: "600",
+          dropShadow: {
+            alpha: 0.8,
+            blur: 2,
+            distance: 1,
+          },
         },
-      },
-    });
-    label.anchor.set(0.5, 1);
-    label.position.set(midPt.x, midPt.y - 8);
-    root.addChild(label);
+      });
+      label.anchor.set(0.5, 1);
+      label.position.set(midPt.x, midPt.y - 6);
+      label.alpha = 0.7;
+      root.addChild(label);
+    }
 
     // --- Whale sprites: load async, then animate swimming ---
     let destroyed = false;
@@ -205,7 +245,7 @@ export function TransferLine({ whale, world, onClick }: Props) {
       }
       root.destroy({ children: true });
     };
-  }, [whale, world]);
+  }, [whale, world, xOffset, age, rank]);
 
   return null;
 }

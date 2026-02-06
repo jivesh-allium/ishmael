@@ -11,7 +11,10 @@ logger = logging.getLogger(__name__)
 
 EXPLORER_BASE = "https://api.allium.so/api/v1/explorer"
 
-DEFAULT_CHAINS = ["ethereum", "polygon", "arbitrum", "optimism", "base"]
+DEFAULT_CHAINS = [
+    "ethereum", "polygon", "arbitrum", "optimism", "base",
+    "avalanche", "bsc", "linea", "scroll", "zksync", "blast",
+]
 DEFAULT_CATEGORIES = ["cex", "dex", "bridge", "fund"]
 
 

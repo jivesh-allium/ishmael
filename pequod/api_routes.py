@@ -5,12 +5,17 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import math
+import time
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from pequod import pipeline
+from pequod.client import AlliumClient
+from pequod.enricher import build_price_map
 from pequod.geo import GeoMap
 from pequod.label_registry import LabelRegistry
+from pequod.pipeline import extract_alerts
 from pequod.watchlist import Watchlist
 
 logger = logging.getLogger(__name__)
@@ -21,18 +26,28 @@ router = APIRouter(prefix="/api")
 _watchlist: Watchlist | None = None
 _geo_map: GeoMap | None = None
 _label_registry: LabelRegistry | None = None
+_client: AlliumClient | None = None
+_min_usd_threshold: float = 1_000_000
+
+# Simple cache for history endpoint: (lookback_minutes, fetched_at, alerts)
+_history_cache: dict[int, tuple[float, list[dict]]] = {}
+_HISTORY_CACHE_TTL = 60  # seconds
 
 
 def configure(
     watchlist: Watchlist,
     geo_map: GeoMap,
     label_registry: LabelRegistry | None = None,
+    client: AlliumClient | None = None,
+    min_usd_threshold: float = 1_000_000,
 ) -> None:
     """Inject shared state from server startup."""
-    global _watchlist, _geo_map, _label_registry
+    global _watchlist, _geo_map, _label_registry, _client, _min_usd_threshold
     _watchlist = watchlist
     _geo_map = geo_map
     _label_registry = label_registry
+    _client = client
+    _min_usd_threshold = min_usd_threshold
 
 
 @router.get("/map")
@@ -102,6 +117,100 @@ async def get_whale(tx_hash: str):
         if alert.get("tx_hash") == tx_hash:
             return {"alert": alert}
     return {"alert": None, "error": "Not found"}
+
+
+@router.get("/whales/history")
+async def get_whales_history(lookback_minutes: int = 60):
+    """On-demand historical fetch from the Allium API.
+
+    Fetches transactions for the full watchlist with the given lookback,
+    runs through extract_alerts + enrichment, and returns the results.
+    Cached for 60 seconds per lookback_minutes value.
+    """
+    if not _client or not _watchlist:
+        return {"alerts": [], "error": "Server not ready"}
+
+    lookback_minutes = max(5, min(lookback_minutes, 1440))
+
+    # Check cache
+    now = time.time()
+    if lookback_minutes in _history_cache:
+        cached_at, cached_alerts = _history_cache[lookback_minutes]
+        if now - cached_at < _HISTORY_CACHE_TTL:
+            return {"alerts": cached_alerts, "total": len(cached_alerts), "cached": True}
+
+    lookback_days = max(1, math.ceil(lookback_minutes / 1440))
+    batches = _watchlist.batches(size=20, exclude_chains=frozenset({"bitcoin"}))
+
+    # Fetch all batches concurrently (semaphore to limit to 4 parallel)
+    sem = asyncio.Semaphore(4)
+    all_alerts: list[dict] = []
+
+    # Max pages to paginate per batch (to avoid runaway fetches)
+    max_pages = 3 if lookback_minutes <= 60 else 5
+
+    async def fetch_batch(batch: list[dict[str, str]]) -> list[dict]:
+        async with sem:
+            try:
+                all_txs = []
+                cursor = None
+                for _page in range(max_pages):
+                    resp = await _client.get_wallet_transactions(
+                        batch, limit=200, lookback_days=lookback_days, cursor=cursor,
+                    )
+                    all_txs.extend(resp.items)
+                    if not resp.cursor or not resp.items:
+                        break
+                    cursor = resp.cursor
+
+                if not all_txs:
+                    return []
+                price_map = await build_price_map(_client, all_txs)
+                alerts = []
+                for tx in all_txs:
+                    for alert in extract_alerts(tx, price_map, _watchlist):
+                        if alert.usd_value < _min_usd_threshold:
+                            continue
+                        alerts.append(pipeline._alert_to_dict(alert))
+                return alerts
+            except Exception:
+                logger.exception("History fetch failed for batch")
+                return []
+
+    results = await asyncio.gather(*(fetch_batch(b) for b in batches))
+    for batch_alerts in results:
+        all_alerts.extend(batch_alerts)
+
+    # Precise time cutoff (lookback_days is coarse, filter to exact minutes)
+    from datetime import datetime, timedelta, timezone
+
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=lookback_minutes)
+    filtered = []
+    seen_keys: set[str] = set()
+    for a in all_alerts:
+        # Dedup by tx_hash + alert_type
+        key = f"{a.get('tx_hash')}:{a.get('alert_type')}:{a.get('asset_symbol')}"
+        if key in seen_keys:
+            continue
+        seen_keys.add(key)
+        ts_str = a.get("block_timestamp", "")
+        if not (ts_str.endswith("Z") or "+" in ts_str):
+            ts_str += "Z"
+        try:
+            ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+            if ts < cutoff:
+                continue
+        except (ValueError, TypeError):
+            pass
+        filtered.append(a)
+
+    # Sort by timestamp descending
+    filtered.sort(key=lambda a: a.get("block_timestamp", ""), reverse=True)
+
+    # Cache result
+    _history_cache[lookback_minutes] = (now, filtered)
+
+    return {"alerts": filtered, "total": len(filtered), "cached": False}
 
 
 # ---------------------------------------------------------------------------

@@ -101,7 +101,7 @@ function AlertEntry({
 
 export function AlertFeed({ alerts, onClickAlert, connected }: Props) {
   return (
-    <div className="absolute right-0 top-0 bottom-0 w-80 bg-[#0a1628]/95 backdrop-blur-sm border-l border-[#1a3a5c] flex flex-col z-20">
+    <div className="absolute right-0 top-0 bottom-0 w-72 bg-[#0a1628]/95 backdrop-blur-sm border-l border-[#1a3a5c] flex flex-col z-20">
       {/* Header */}
       <div className="p-4 border-b border-[#1a3a5c]">
         <div className="flex items-center justify-between">

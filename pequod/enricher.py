@@ -43,6 +43,24 @@ NATIVE_TO_WRAPPED: dict[str, dict[str, str]] = {
     "bitcoin": {
         "address": "btc",  # placeholder — price API may handle natively
     },
+    "avalanche": {
+        "address": "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7",  # WAVAX
+    },
+    "bsc": {
+        "address": "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",  # WBNB
+    },
+    "linea": {
+        "address": "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f",  # WETH on Linea
+    },
+    "scroll": {
+        "address": "0x5300000000000000000000000000000000000004",  # WETH on Scroll
+    },
+    "zksync": {
+        "address": "0x5aea5775959fbc2557cc8789bc1bf90a239d9a91",  # WETH on zkSync
+    },
+    "blast": {
+        "address": "0x4300000000000000000000000000000000000004",  # WETH on Blast
+    },
 }
 
 # Key for price_map: (address_lower, chain)

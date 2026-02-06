@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import { Application, Container, TilingSprite, Texture, Assets, Graphics } from "pixi.js";
 import { geoToPixel, MAP_WIDTH, MAP_HEIGHT } from "../lib/geo";
 import { OCEAN_TILE } from "../assets/sprites";
@@ -8,9 +8,14 @@ import { ShipCursor } from "./ShipCursor";
 import { TransferLine } from "./TransferLine";
 import { MobyDick } from "./MobyDick";
 
+// No horizontal wrapping — single map copy only
+const ISLAND_OFFSETS = [0];
+
 interface Props {
   entities: MapEntity[];
   whales: WhaleAlert[];
+  selectedWhale: WhaleAlert | null;
+  selectedIsland: MapEntity | null;
   onSelectWhale: (whale: WhaleAlert) => void;
   onSelectIsland: (entity: MapEntity) => void;
   onMobyClick: () => void;
@@ -21,6 +26,8 @@ interface Props {
 export function OceanMap({
   entities,
   whales,
+  selectedWhale,
+  selectedIsland,
   onSelectWhale,
   onSelectIsland,
   onMobyClick,
@@ -71,7 +78,7 @@ export function OceanMap({
       app.stage.addChild(world);
       worldRef.current = world;
 
-      // Ocean tiling background
+      // Ocean tiling background — single map extent plus small margin
       const oceanTexture = await Assets.load(OCEAN_TILE);
       if (destroyed) return;
       const ocean = new TilingSprite({
@@ -107,10 +114,11 @@ export function OceanMap({
       transferLayerRef.current = transferLayer;
 
       // Center camera
+      const initialScale = Math.max(app.screen.height / MAP_HEIGHT, 0.8);
       camera.current = {
-        x: -MAP_WIDTH / 2 * 0.8 + app.screen.width / 2,
-        y: -MAP_HEIGHT / 2 * 0.8 + app.screen.height / 2,
-        scale: 0.8,
+        x: -MAP_WIDTH / 2 * initialScale + app.screen.width / 2,
+        y: -MAP_HEIGHT / 2 * initialScale + app.screen.height / 2,
+        scale: initialScale,
       };
       world.position.set(camera.current.x, camera.current.y);
       world.scale.set(camera.current.scale);
@@ -132,12 +140,38 @@ export function OceanMap({
     };
   }, []);
 
+  // Camera normalization: X + Y both clamped (no infinite scroll)
+  const clampCamera = useCallback(() => {
+    const app = appRef.current;
+    if (!app) return;
+    const s = camera.current.scale;
+    const screenW = app.screen.width;
+    const screenH = app.screen.height;
+
+    // X: clamp so map doesn't scroll beyond edges
+    const mapW = MAP_WIDTH * s;
+    if (mapW <= screenW) {
+      camera.current.x = (screenW - mapW) / 2;
+    } else {
+      camera.current.x = Math.min(0, Math.max(-(mapW - screenW), camera.current.x));
+    }
+
+    // Y: clamp so map always fills viewport vertically
+    const mapH = MAP_HEIGHT * s;
+    if (mapH <= screenH) {
+      camera.current.y = (screenH - mapH) / 2;
+    } else {
+      camera.current.y = Math.min(0, Math.max(-(mapH - screenH), camera.current.y));
+    }
+  }, []);
+
   // Update camera from pan/zoom
   const updateCamera = useCallback(() => {
     if (!worldRef.current) return;
+    clampCamera();
     worldRef.current.position.set(camera.current.x, camera.current.y);
     worldRef.current.scale.set(camera.current.scale);
-  }, []);
+  }, [clampCamera]);
 
   // Mouse handlers for pan/zoom
   useEffect(() => {
@@ -172,10 +206,26 @@ export function OceanMap({
       dragging.current = false;
     };
 
+    let lastWheelTime = 0;
+    const WHEEL_THROTTLE_MS = 16; // ~60fps cap
+
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
+
+      const now = performance.now();
+      if (now - lastWheelTime < WHEEL_THROTTLE_MS) return;
+      lastWheelTime = now;
+
+      // Horizontal scroll → pan (trackpad two-finger)
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 2) {
+        camera.current.x -= e.deltaX;
+        updateCamera();
+        return;
+      }
+
       const factor = e.deltaY > 0 ? 0.92 : 1.08;
-      const newScale = Math.min(5, Math.max(0.2, camera.current.scale * factor));
+      const minScale = appRef.current ? appRef.current.screen.height / MAP_HEIGHT : 0.5;
+      const newScale = Math.min(5, Math.max(minScale, camera.current.scale * factor));
       const ratio = newScale / camera.current.scale;
 
       // Zoom toward mouse cursor
@@ -209,29 +259,61 @@ export function OceanMap({
     updateCamera();
   }, [panTarget, updateCamera]);
 
+  // Compute highlighted address set from selected whale or island
+  const highlightedAddresses = useMemo(() => {
+    const addrs = new Set<string>();
+    if (selectedWhale) {
+      if (selectedWhale.from_address) addrs.add(selectedWhale.from_address.toLowerCase());
+      if (selectedWhale.to_address) addrs.add(selectedWhale.to_address.toLowerCase());
+    }
+    if (selectedIsland) {
+      for (const a of selectedIsland.addresses) addrs.add(a.address.toLowerCase());
+    }
+    return addrs;
+  }, [selectedWhale, selectedIsland]);
+
+  // Compute age for each whale (ms since block_timestamp)
+  const now = Date.now();
+
   return (
     <div ref={canvasRef} className="absolute inset-0 cursor-grab active:cursor-grabbing">
       {ready && worldRef.current && (
         <>
-          {/* Island markers for known entities */}
-          {entities.map((entity) => (
-            <IslandMarker
-              key={entity.label}
-              entity={entity}
-              world={worldRef.current!}
-              onClick={() => onSelectIsland(entity)}
-            />
-          ))}
+          {/* Island markers */}
+          {ISLAND_OFFSETS.flatMap(offset =>
+            entities.map(entity => {
+              const isHighlighted = highlightedAddresses.size > 0 &&
+                entity.addresses.some(a => highlightedAddresses.has(a.address.toLowerCase()));
+              return (
+                <IslandMarker
+                  key={`${entity.label}:${offset}`}
+                  entity={entity}
+                  world={worldRef.current!}
+                  onClick={() => onSelectIsland(entity)}
+                  xOffset={offset}
+                  highlighted={isHighlighted}
+                />
+              );
+            })
+          )}
 
-          {/* Transfer lines with whale convoys */}
-          {whales.slice(0, 100).map((whale) => (
-            <TransferLine
-              key={`tl-${whale.tx_hash}-${whale.alert_type}`}
-              whale={whale}
-              world={worldRef.current!}
-              onClick={() => onSelectWhaleRef.current(whale)}
-            />
-          ))}
+          {/* Transfer lines (no wrap offsets — single map copy) */}
+          {whales.slice(0, 150).map((whale, rank) => {
+            const ts = whale.block_timestamp.endsWith("Z") || whale.block_timestamp.includes("+")
+              ? whale.block_timestamp
+              : whale.block_timestamp + "Z";
+            const age = now - new Date(ts).getTime();
+            return (
+              <TransferLine
+                key={`tl-${whale.tx_hash}-${whale.alert_type}`}
+                whale={whale}
+                world={transferLayerRef.current!}
+                onClick={() => onSelectWhaleRef.current(whale)}
+                age={age}
+                rank={rank}
+              />
+            );
+          })}
 
           {/* Ship cursor */}
           <ShipCursor

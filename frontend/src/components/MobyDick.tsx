@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Container, Sprite, Text, Assets } from "pixi.js";
+import { Container, Sprite, Assets } from "pixi.js";
 import { WHITE_WHALE_SPRITE } from "../assets/sprites";
 import { MAP_WIDTH, MAP_HEIGHT } from "../lib/geo";
 
@@ -9,9 +9,11 @@ interface Props {
   onClick: () => void;
 }
 
+type Phase = "fading_in" | "visible" | "fading_out" | "hidden";
+
 /**
- * Moby Dick — a white whale that roams the map forever.
- * Drifts slowly, bounces off edges. Clicking it hides it (controlled by parent).
+ * Moby Dick — a tiny white whale that roams the map.
+ * Drifts slowly, fades in/out on a cycle. Clicking it triggers parent handler.
  */
 export function MobyDick({ world, hidden, onClick }: Props) {
   const onClickRef = useRef(onClick);
@@ -47,61 +49,96 @@ export function MobyDick({ world, hidden, onClick }: Props) {
 
       const sprite = new Sprite(texture);
       sprite.anchor.set(0.5);
-      sprite.scale.set(1.8);
+      sprite.scale.set(0.35);
       root.addChild(sprite);
 
-      // "Moby Dick" label
-      const label = new Text({
-        text: "Moby Dick",
-        style: {
-          fontFamily: "'Pirata One', cursive",
-          fontSize: 11,
-          fill: 0xf5f0e6,
-          fontWeight: "700",
-          dropShadow: {
-            alpha: 0.8,
-            blur: 4,
-            distance: 1,
-            color: 0x000000,
-          },
-        },
-      });
-      label.anchor.set(0.5, 0);
-      label.position.set(0, 30);
-      root.addChild(label);
+      // Phase state machine for disappear/reappear cycle
+      let phase: Phase = "fading_in";
+      let phaseStart = performance.now();
 
-      const startTime = performance.now();
+      function phaseDuration(p: Phase): number {
+        switch (p) {
+          case "fading_in": return 2000;
+          case "visible": return 30000 + Math.random() * 30000;
+          case "fading_out": return 2000;
+          case "hidden": return 10000 + Math.random() * 10000;
+        }
+      }
+
+      let currentPhaseDuration = phaseDuration(phase);
+
+      function nextPhase() {
+        switch (phase) {
+          case "fading_in":
+            phase = "visible";
+            break;
+          case "visible":
+            phase = "fading_out";
+            break;
+          case "fading_out":
+            phase = "hidden";
+            root.eventMode = "none";
+            break;
+          case "hidden":
+            // Teleport to new random position
+            root.x = MAP_WIDTH * 0.1 + Math.random() * MAP_WIDTH * 0.8;
+            root.y = MAP_HEIGHT * 0.2 + Math.random() * MAP_HEIGHT * 0.6;
+            vx = (Math.random() > 0.5 ? 1 : -1) * (0.15 + Math.random() * 0.25);
+            vy = (Math.random() - 0.5) * 0.1;
+            phase = "fading_in";
+            root.eventMode = "static";
+            break;
+        }
+        phaseStart = performance.now();
+        currentPhaseDuration = phaseDuration(phase);
+      }
 
       const animate = (now: number) => {
         if (destroyed) return;
-        const elapsed = now - startTime;
+        const elapsed = now - phaseStart;
 
-        // Fade in over first 2 seconds (only when visible)
-        if (root.visible && root.alpha < 1) {
-          root.alpha = Math.min(1, root.alpha + 0.02);
+        // Phase transitions
+        if (elapsed >= currentPhaseDuration) {
+          nextPhase();
+        }
+
+        // Alpha based on phase
+        const phaseT = Math.min(1, elapsed / currentPhaseDuration);
+        switch (phase) {
+          case "fading_in":
+            root.alpha = phaseT;
+            break;
+          case "visible":
+            root.alpha = 1;
+            break;
+          case "fading_out":
+            root.alpha = 1 - phaseT;
+            break;
+          case "hidden":
+            root.alpha = 0;
+            break;
         }
 
         // Drift (even when hidden, so it's in a new spot on respawn)
         root.x += vx;
         root.y += vy;
 
-        // Bounce off map edges with padding
+        // Wrap horizontally
+        if (root.x < 0) root.x += MAP_WIDTH;
+        else if (root.x > MAP_WIDTH) root.x -= MAP_WIDTH;
+        // Bounce off vertical edges with padding
         const pad = 100;
-        if (root.x < pad || root.x > MAP_WIDTH - pad) {
-          vx = -vx;
-          root.x = Math.max(pad, Math.min(MAP_WIDTH - pad, root.x));
-        }
         if (root.y < pad || root.y > MAP_HEIGHT - pad) {
           vy = -vy;
           root.y = Math.max(pad, Math.min(MAP_HEIGHT - pad, root.y));
         }
 
-        // Gentle bobbing
-        sprite.y = Math.sin(elapsed / 600) * 3;
-        sprite.rotation = Math.sin(elapsed / 1200) * 0.05;
+        // Gentle bobbing (reduced)
+        sprite.y = Math.sin(now / 600) * 1;
+        sprite.rotation = Math.sin(now / 1200) * 0.02;
 
         // Flip sprite based on direction
-        sprite.scale.x = vx < 0 ? -1.8 : 1.8;
+        sprite.scale.x = vx < 0 ? -0.35 : 0.35;
 
         rafId = requestAnimationFrame(animate);
       };
@@ -120,7 +157,7 @@ export function MobyDick({ world, hidden, onClick }: Props) {
     };
   }, [world]);
 
-  // React to hidden prop changes
+  // React to hidden prop changes (from parent click handler)
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
@@ -129,7 +166,7 @@ export function MobyDick({ world, hidden, onClick }: Props) {
       root.eventMode = "none";
     } else {
       root.visible = true;
-      root.alpha = 0; // fade back in via animation loop
+      root.alpha = 0;
       root.eventMode = "static";
     }
   }, [hidden]);

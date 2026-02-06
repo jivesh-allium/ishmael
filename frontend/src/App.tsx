@@ -1,12 +1,15 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { OceanMap } from "./components/OceanMap";
 import { AlertFeed } from "./components/AlertFeed";
-import { WhaleInspector, IslandInspector } from "./components/WalletInspector";
-import { Compass } from "./components/Compass";
+import { DetailPanel } from "./components/DetailPanel";
+import { ShipsClock } from "./components/ShipsClock";
+import { CrowsNest } from "./components/CrowsNest";
+import { Leaderboard } from "./components/Leaderboard";
+import { Spyglass } from "./components/Spyglass";
 import { WhitenessModal } from "./components/WhitenessModal";
 import { useWhaleUpdates } from "./hooks/useWhaleUpdates";
-import { fetchMapData, fetchWhales } from "./lib/api";
+import { fetchMapData, fetchWhales, fetchWhaleHistory } from "./lib/api";
 import { randomQuote, jokeOfTheHour, CHAPTER_49 } from "./lib/quotes";
 import type { MapEntity, WhaleAlert } from "./types/whale";
 
@@ -17,10 +20,13 @@ export default function App() {
   const [selectedIsland, setSelectedIsland] = useState<MapEntity | null>(null);
   const [panTarget, setPanTarget] = useState<{ x: number; y: number } | null>(null);
   const [showFaq, setShowFaq] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showSpyglass, setShowSpyglass] = useState(false);
   const [mobyQuote, setMobyQuote] = useState<string | null>(null);
   const [mobyHidden, setMobyHidden] = useState(false);
   const mobyTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [toastQuote, setToastQuote] = useState<string | null>(null);
+  const [timeWindow, setTimeWindow] = useState<number | null>(null);
 
   // Load initial data + periodically refresh map (picks up discovered entities)
   useEffect(() => {
@@ -32,7 +38,7 @@ export default function App() {
     loadMap();
     const mapInterval = setInterval(loadMap, 30_000);
 
-    fetchWhales(200)
+    fetchWhales(500)
       .then((data) => setWhales(data.alerts))
       .catch((err) => console.error("Failed to load whales:", err));
 
@@ -45,6 +51,43 @@ export default function App() {
   }, []);
 
   const { connected } = useWhaleUpdates(onNewAlert);
+
+  // Fetch historical data when time window changes (backfills beyond the live buffer)
+  useEffect(() => {
+    if (timeWindow === null) return;
+    let cancelled = false;
+    fetchWhaleHistory(timeWindow)
+      .then((data) => {
+        if (cancelled) return;
+        setWhales((prev) => {
+          // Merge: keep existing (live) alerts + add any historical ones not already present
+          const existing = new Set(prev.map((w) => `${w.tx_hash}:${w.alert_type}`));
+          const newAlerts = data.alerts.filter(
+            (w) => !existing.has(`${w.tx_hash}:${w.alert_type}`)
+          );
+          if (newAlerts.length === 0) return prev;
+          // Merge and sort by timestamp descending, cap at 2000
+          const merged = [...prev, ...newAlerts]
+            .sort((a, b) => (b.block_timestamp > a.block_timestamp ? 1 : -1))
+            .slice(0, 2000);
+          return merged;
+        });
+      })
+      .catch((err) => console.error("Failed to fetch history:", err));
+    return () => { cancelled = true; };
+  }, [timeWindow]);
+
+  const filteredWhales = useMemo(() => {
+    if (timeWindow === null) return whales;
+    const cutoff = Date.now() - timeWindow * 60_000;
+    return whales.filter((w) => {
+      const ts =
+        w.block_timestamp.endsWith("Z") || w.block_timestamp.includes("+")
+          ? w.block_timestamp
+          : w.block_timestamp + "Z";
+      return new Date(ts).getTime() >= cutoff;
+    });
+  }, [whales, timeWindow]);
 
   const handleClickAlert = useCallback(
     (whale: WhaleAlert, pixel: { x: number; y: number }) => {
@@ -68,7 +111,7 @@ export default function App() {
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#0a1628] relative">
       {/* Title bar */}
-      <div className="absolute top-0 left-0 right-80 z-20 p-4">
+      <div className="absolute top-0 left-0 right-72 z-20 p-4">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowFaq(true)}
@@ -76,6 +119,20 @@ export default function App() {
             title="The Hyena"
           >
             📖
+          </button>
+          <button
+            onClick={() => setShowLeaderboard(true)}
+            className="text-amber-700 hover:text-amber-400 transition-colors text-lg leading-none"
+            title="Captain's Ledger"
+          >
+            📊
+          </button>
+          <button
+            onClick={() => setShowSpyglass(true)}
+            className="text-amber-700 hover:text-amber-400 transition-colors text-lg leading-none"
+            title="Spyglass"
+          >
+            🔭
           </button>
           <div>
             <h1
@@ -110,10 +167,15 @@ export default function App() {
         </AnimatePresence>
       </div>
 
+      {/* Ship's Clock — time window selector */}
+      <ShipsClock value={timeWindow} onChange={setTimeWindow} />
+
       {/* Main map canvas */}
       <OceanMap
         entities={entities}
-        whales={whales}
+        whales={filteredWhales}
+        selectedWhale={selectedWhale}
+        selectedIsland={selectedIsland}
         onSelectWhale={handleSelectWhale}
         onSelectIsland={handleSelectIsland}
         onMobyClick={() => {
@@ -126,29 +188,22 @@ export default function App() {
 
       {/* Right panel: alert feed */}
       <AlertFeed
-        alerts={whales}
+        alerts={filteredWhales}
         onClickAlert={handleClickAlert}
         connected={connected}
       />
 
-      {/* Bottom minimap compass */}
-      <Compass entities={entities} whales={whales} />
+      {/* Bottom-left stats bar */}
+      <CrowsNest whales={filteredWhales} />
 
-      {/* Inspector popup */}
-      <AnimatePresence>
-        {selectedWhale && (
-          <WhaleInspector
-            whale={selectedWhale}
-            onClose={() => setSelectedWhale(null)}
-          />
-        )}
-        {selectedIsland && (
-          <IslandInspector
-            entity={selectedIsland}
-            onClose={() => setSelectedIsland(null)}
-          />
-        )}
-      </AnimatePresence>
+      {/* Detail panel (left side) */}
+      <DetailPanel
+        selectedWhale={selectedWhale}
+        selectedIsland={selectedIsland}
+        whales={whales}
+        onClose={() => { setSelectedWhale(null); setSelectedIsland(null); }}
+        onClickWhale={handleClickAlert}
+      />
 
       {/* Chapter 49 — "FAQ" from book button */}
       <WhitenessModal
@@ -157,6 +212,21 @@ export default function App() {
         chapter="Chapter 49"
         chapterTitle="The Hyena"
         content={CHAPTER_49}
+      />
+
+      {/* Captain's Ledger — leaderboard overlay */}
+      <Leaderboard
+        whales={filteredWhales}
+        open={showLeaderboard}
+        onClose={() => setShowLeaderboard(false)}
+      />
+
+      {/* Spyglass — search overlay */}
+      <Spyglass
+        whales={whales}
+        open={showSpyglass}
+        onClose={() => setShowSpyglass(false)}
+        onSelect={handleClickAlert}
       />
 
       {/* Moby Dick quote popup */}

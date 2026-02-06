@@ -114,10 +114,15 @@ async def lifespan(app: FastAPI):
     # Wire shared state
     pipeline.geo_map = geo_map
     pipeline.label_registry = label_reg
-    api_routes.configure(watchlist, geo_map, label_registry=label_reg)
-
     # Phase B: Start background tasks
     client = AlliumClient(settings.allium_api_key)
+
+    api_routes.configure(
+        watchlist, geo_map,
+        label_registry=label_reg,
+        client=client,
+        min_usd_threshold=settings.min_usd_threshold,
+    )
     broadcaster = TelegramBroadcaster(settings.telegram_bot_token, settings.telegram_chat_id)
 
     poller_task = asyncio.create_task(_run_poller(settings, watchlist, client, broadcaster))

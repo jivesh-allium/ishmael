@@ -22,6 +22,16 @@ export async function fetchWhaleDetail(
   return res.json();
 }
 
+export async function fetchWhaleHistory(
+  lookbackMinutes: number
+): Promise<WhalesResponse> {
+  const res = await fetch(
+    `${BASE}/api/whales/history?lookback_minutes=${lookbackMinutes}`
+  );
+  if (!res.ok) throw new Error(`Failed to fetch whale history: ${res.status}`);
+  return res.json();
+}
+
 export function formatUsd(value: number): string {
   if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(1)}B`;
   if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;

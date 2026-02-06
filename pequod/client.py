@@ -35,6 +35,7 @@ class AlliumClient:
         addresses: list[dict[str, str]],
         limit: int = 100,
         lookback_days: int = 1,
+        cursor: str | None = None,
     ) -> TransactionsResponse:
         """Fetch transactions for a batch of addresses (max 20 per request).
 
@@ -42,12 +43,17 @@ class AlliumClient:
             addresses: list of {"chain": ..., "address": ...} dicts.
             limit: max transactions to return (API max 1000).
             lookback_days: only return txs newer than this many days ago.
+            cursor: pagination cursor from a previous response.
         """
+        params: dict[str, str | int] = {"limit": limit}
+        if cursor:
+            params["cursor"] = cursor
+
         last_exc: Exception | None = None
         for attempt in range(MAX_RETRIES + 1):
             resp = await self._client.post(
                 "/wallet/transactions",
-                params={"limit": limit},
+                params=params,
                 json=addresses,
             )
             if resp.status_code < 500:

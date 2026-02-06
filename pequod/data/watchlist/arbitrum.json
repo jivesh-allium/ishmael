@@ -1,0 +1,26 @@
+{
+  "chain": "arbitrum",
+  "addresses": {
+    "exchanges": {
+      "Binance Hot 1": "0x28c6c06298d514db089934071355e5743bf21d60",
+      "Binance Hot 2": "0x21a31ee1afc51d94c2efccaa2092ad1028285549",
+      "Coinbase Hot": "0x71660c4005ba85c37ccec55d0c4493e66fe775d3",
+      "Coinbase Prime": "0xa9d1e08c7793af67e9d92fe308d5697fb81d3e43",
+      "Kraken Hot": "0x2910543af39aba0cd09dbb2d50200b3e800a63d2",
+      "OKX Hot 1": "0x98ec059dc3adfbdd63429454aeb0c990fba4a128",
+      "OKX Hot 2": "0x6cc5f688a315f3dc28a7781717a9a798a59fda7b",
+      "Bybit Hot": "0xf89d7b9c864f589bbf53a82105107622b35eaa40",
+      "Gate.io Hot": "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+      "Crypto.com Hot": "0x6262998ced04146fa42253a5c0af90ca02dfd2a3"
+    },
+    "defi": {
+      "GMX Vault": "0x489ee077994b6658eafa855c308275ead8097c4a",
+      "Aave V3 Pool": "0x794a61358d6845594f94dc1db02a252b5b4814ad",
+      "Uniswap V3 Router": "0xe592427a0aece92de3edee1f18e0157c05861564"
+    },
+    "whales": {
+      "Wintermute": "0x0000006daea1723962647b7e189d311d757fb793",
+      "Jump Trading": "0x9507c04b10486547584c37bcbd931b2a4fee9a41"
+    }
+  }
+}
