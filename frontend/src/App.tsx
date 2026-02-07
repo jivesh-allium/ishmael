@@ -10,6 +10,7 @@ import { Leaderboard } from "./components/Leaderboard";
 import { Spyglass } from "./components/Spyglass";
 import { WhitenessModal } from "./components/WhitenessModal";
 import { useWhaleUpdates } from "./hooks/useWhaleUpdates";
+import { useIsMobile } from "./hooks/useIsMobile";
 import { fetchMapData, fetchWhales, fetchWhaleHistory } from "./lib/api";
 import { randomQuote, jokeOfTheHour, CHAPTER_49 } from "./lib/quotes";
 import type { MapEntity, WhaleAlert } from "./types/whale";
@@ -30,6 +31,8 @@ export default function App() {
   const [timeWindow, setTimeWindow] = useState<number | null>(null);
   const [tokenFilter, setTokenFilter] = useState<string | null>(null);
   const [bottomPanelH, setBottomPanelH] = useState(160);
+  const [mobileShowFeed, setMobileShowFeed] = useState(false);
+  const isMobile = useIsMobile();
   const resizing = useRef(false);
   const resizeStartY = useRef(0);
   const resizeStartH = useRef(0);
@@ -183,7 +186,7 @@ export default function App() {
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#0a1628] relative">
       {/* Title bar */}
-      <div className="absolute top-0 left-0 right-72 z-20 p-4">
+      <div className="absolute top-0 left-0 right-0 md:right-72 z-20 p-4">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowFaq(true)}
@@ -240,7 +243,7 @@ export default function App() {
       </div>
 
       {/* Ship's Clock — time window selector */}
-      <ShipsClock value={timeWindow} onChange={setTimeWindow} />
+      <ShipsClock value={timeWindow} onChange={setTimeWindow} compact={isMobile} />
 
       {/* Main map canvas */}
       <OceanMap
@@ -259,18 +262,55 @@ export default function App() {
       />
 
       {/* Right panel: alert feed */}
-      <AlertFeed
-        alerts={displayWhales}
-        onClickAlert={handleClickAlert}
-        connected={connected}
-        tokenFilter={tokenFilter}
-        availableTokens={availableTokens}
-        onTokenFilter={setTokenFilter}
-      />
+      {isMobile ? (
+        <>
+          <AnimatePresence>
+            {mobileShowFeed && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <AlertFeed
+                  alerts={displayWhales}
+                  onClickAlert={(whale, pixel) => {
+                    handleClickAlert(whale, pixel);
+                    setMobileShowFeed(false);
+                  }}
+                  connected={connected}
+                  tokenFilter={tokenFilter}
+                  availableTokens={availableTokens}
+                  onTokenFilter={setTokenFilter}
+                  isMobile
+                  onClose={() => setMobileShowFeed(false)}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {!mobileShowFeed && (
+            <button
+              onClick={() => setMobileShowFeed(true)}
+              className="fixed bottom-4 right-4 z-30 bg-amber-700/80 hover:bg-amber-600/90 text-amber-100 rounded-full px-4 py-2.5 shadow-lg backdrop-blur-sm border border-amber-600/40 text-sm font-medium transition-colors"
+              style={{ fontFamily: "'Pirata One', cursive" }}
+            >
+              Ship's Log
+            </button>
+          )}
+        </>
+      ) : (
+        <AlertFeed
+          alerts={displayWhales}
+          onClickAlert={handleClickAlert}
+          connected={connected}
+          tokenFilter={tokenFilter}
+          availableTokens={availableTokens}
+          onTokenFilter={setTokenFilter}
+        />
+      )}
 
-      {/* Bottom panel: price chart + exchange flow (resizable) */}
+      {/* Bottom panel: price chart + exchange flow (resizable) — hidden on mobile */}
       <div
-        className="absolute bottom-0 left-0 right-72 z-20 bg-[#0a1628]/90 backdrop-blur-sm border-t border-[#1a3a5c]/40 flex flex-col"
+        className="absolute bottom-0 left-0 right-72 z-20 bg-[#0a1628]/90 backdrop-blur-sm border-t border-[#1a3a5c]/40 hidden md:flex flex-col"
         style={{ height: bottomPanelH }}
       >
         {/* Drag handle */}
@@ -297,13 +337,14 @@ export default function App() {
         </div>
       </div>
 
-      {/* Detail panel (left side) */}
+      {/* Detail panel (left side on desktop, bottom sheet on mobile) */}
       <DetailPanel
         selectedWhale={selectedWhale}
         selectedIsland={selectedIsland}
         whales={whales}
         onClose={() => { setSelectedWhale(null); setSelectedIsland(null); }}
         onClickWhale={handleClickAlert}
+        isMobile={isMobile}
       />
 
       {/* Chapter 49 — "FAQ" from book button */}

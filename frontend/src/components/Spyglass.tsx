@@ -90,7 +90,7 @@ export function Spyglass({ whales, open, onClose, onSelect }: Props) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-start justify-center p-6 pt-12"
+      className="fixed inset-0 z-50 flex items-start justify-center p-3 pt-4 md:p-6 md:pt-12"
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -104,7 +104,7 @@ export function Spyglass({ whales, open, onClose, onSelect }: Props) {
         style={{ background: "linear-gradient(180deg, #1a2a40 0%, #0d1928 100%)", maxHeight: "80vh" }}
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[#1a3a5c]/60">
+        <div className="px-3 pt-4 md:px-5 md:py-4 border-b border-[#1a3a5c]/60">
           <div className="flex items-center justify-between mb-3">
             <h2
               className="text-xl text-amber-100"
@@ -131,7 +131,7 @@ export function Spyglass({ whales, open, onClose, onSelect }: Props) {
           />
 
           {/* Filters */}
-          <div className="flex gap-3 mt-3">
+          <div className="flex flex-wrap gap-3 mt-3">
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] text-slate-500 uppercase tracking-wider">Chain</span>
               <select

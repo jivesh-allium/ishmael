@@ -13,6 +13,8 @@ interface Props {
   tokenFilter: string | null;
   availableTokens: string[];
   onTokenFilter: (t: string | null) => void;
+  isMobile?: boolean;
+  onClose?: () => void;
 }
 
 function timeAgo(timestamp: string): string {
@@ -109,9 +111,15 @@ export function AlertFeed({
   tokenFilter,
   availableTokens,
   onTokenFilter,
+  isMobile,
+  onClose,
 }: Props) {
   return (
-    <div className="absolute right-0 top-0 bottom-0 w-72 bg-[#0a1628]/95 backdrop-blur-sm border-l border-[#1a3a5c] flex flex-col z-20">
+    <div className={
+      isMobile
+        ? "fixed inset-0 z-40 bg-[#0a1628]/95 backdrop-blur-sm flex flex-col"
+        : "absolute right-0 top-0 bottom-0 w-72 bg-[#0a1628]/95 backdrop-blur-sm border-l border-[#1a3a5c] flex flex-col z-20"
+    }>
       {/* Header */}
       <div className="p-4 pb-2 border-b border-[#1a3a5c]">
         <div className="flex items-center justify-between">
@@ -130,6 +138,14 @@ export function AlertFeed({
             <span className="text-xs text-slate-400">
               {connected ? "Live" : "Reconnecting..."}
             </span>
+            {isMobile && onClose && (
+              <button
+                onClick={onClose}
+                className="ml-2 text-slate-400 hover:text-white text-lg leading-none"
+              >
+                &times;
+              </button>
+            )}
           </div>
         </div>
         <p className="text-xs text-slate-500 mt-1">

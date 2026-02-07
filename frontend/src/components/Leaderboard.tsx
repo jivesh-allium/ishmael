@@ -116,7 +116,7 @@ export function Leaderboard({ whales, open, onClose }: Props) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-start justify-center p-6 pt-12 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-6 md:p-6 md:pt-12 overflow-y-auto"
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -151,9 +151,9 @@ export function Leaderboard({ whales, open, onClose }: Props) {
         </div>
 
         {/* Content grid */}
-        <div className="p-6 grid grid-cols-2 gap-6">
+        <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Top Wallets */}
-          <div className="col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <SectionTitle>Top Wallets</SectionTitle>
             <div className="rounded-md border border-[#1a3a5c]/40 overflow-hidden">
               <table className="w-full text-xs">

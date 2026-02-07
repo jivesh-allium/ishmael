@@ -32,7 +32,7 @@ export function CrowsNest({ whales }: Props) {
   }, [whales]);
 
   return (
-    <div className="absolute bottom-4 left-4 z-20 flex items-center gap-4 bg-[#0a1628]/70 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-[#1a3a5c]/40 text-[11px]">
+    <div className="absolute bottom-4 left-4 z-20 hidden md:flex items-center gap-4 bg-[#0a1628]/70 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-[#1a3a5c]/40 text-[11px]">
       <Stat label="Volume" value={formatUsd(stats.totalVol)} />
       <Sep />
       <Stat label="Alerts" value={String(stats.count)} />

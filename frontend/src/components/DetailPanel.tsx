@@ -12,6 +12,7 @@ interface Props {
   whales: WhaleAlert[];
   onClose: () => void;
   onClickWhale: (whale: WhaleAlert, pixel: { x: number; y: number }) => void;
+  isMobile?: boolean;
 }
 
 function timeAgo(timestamp: string): string {
@@ -314,7 +315,7 @@ function IslandDetail({ entity, entityWhales, onClose, onClickWhale }: {
   );
 }
 
-export function DetailPanel({ selectedWhale, selectedIsland, whales, onClose, onClickWhale }: Props) {
+export function DetailPanel({ selectedWhale, selectedIsland, whales, onClose, onClickWhale, isMobile }: Props) {
   const isOpen = selectedWhale != null || selectedIsland != null;
 
   // Related whales for a selected transfer (same tx_hash, excluding selected)
@@ -340,11 +341,15 @@ export function DetailPanel({ selectedWhale, selectedIsland, whales, onClose, on
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
+          initial={isMobile ? { opacity: 0, y: 40 } : { opacity: 0, x: -20 }}
+          animate={isMobile ? { opacity: 1, y: 0 } : { opacity: 1, x: 0 }}
+          exit={isMobile ? { opacity: 0, y: 40 } : { opacity: 0, x: -20 }}
           transition={{ duration: 0.2 }}
-          className="absolute left-0 top-0 bottom-0 w-72 bg-[#0a1628]/95 backdrop-blur-sm border-r border-[#1a3a5c] flex flex-col z-20 overflow-hidden"
+          className={
+            isMobile
+              ? "absolute bottom-0 left-0 right-0 max-h-[70vh] bg-[#0a1628]/95 backdrop-blur-sm border-t border-[#1a3a5c] flex flex-col z-20 overflow-hidden rounded-t-xl"
+              : "absolute left-0 top-0 bottom-0 w-72 bg-[#0a1628]/95 backdrop-blur-sm border-r border-[#1a3a5c] flex flex-col z-20 overflow-hidden"
+          }
         >
           <div className="flex-1 overflow-y-auto">
             {selectedWhale && (

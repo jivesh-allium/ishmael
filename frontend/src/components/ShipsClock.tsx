@@ -38,9 +38,14 @@ function formatWindow(minutes: number | null): string {
 interface Props {
   value: number | null;
   onChange: (minutes: number | null) => void;
+  compact?: boolean;
 }
 
-export function ShipsClock({ value, onChange }: Props) {
+const COMPACT_PRESETS = PRESETS.filter((p) =>
+  ["5m", "1h", "24h", "All"].includes(p.label)
+);
+
+export function ShipsClock({ value, onChange, compact }: Props) {
   const [expanded, setExpanded] = useState(false);
   const sliderRef = useRef<HTMLInputElement>(null);
 
@@ -77,7 +82,7 @@ export function ShipsClock({ value, onChange }: Props) {
         <div className="w-px h-4 bg-[#2a1f0e]/60" />
 
         {/* Quick presets */}
-        {PRESETS.map((p) => (
+        {(compact ? COMPACT_PRESETS : PRESETS).map((p) => (
           <button
             key={p.label}
             onClick={() => onChange(p.value)}

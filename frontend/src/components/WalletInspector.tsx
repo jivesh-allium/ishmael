@@ -24,7 +24,7 @@ export function WhaleInspector({ whale, onClose }: WhaleInspectorProps) {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[420px] bg-[#0d1a2e]/95 backdrop-blur-md border border-[#1a3a5c] rounded-lg shadow-2xl z-30 overflow-hidden"
+      className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[420px] bg-[#0d1a2e]/95 backdrop-blur-md border border-[#1a3a5c] rounded-lg shadow-2xl z-30 overflow-hidden"
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-[#1a3a5c]">
@@ -162,7 +162,7 @@ export function IslandInspector({ entity, onClose }: IslandInspectorProps) {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[360px] bg-[#0d1a2e]/95 backdrop-blur-md border border-[#1a3a5c] rounded-lg shadow-2xl z-30 overflow-hidden"
+      className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[360px] bg-[#0d1a2e]/95 backdrop-blur-md border border-[#1a3a5c] rounded-lg shadow-2xl z-30 overflow-hidden"
     >
       <div className="flex items-center justify-between p-4 border-b border-[#1a3a5c]">
         <div className="flex items-center gap-2">
